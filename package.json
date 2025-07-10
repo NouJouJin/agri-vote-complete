@@ -1,0 +1,49 @@
+{
+  "name": "agri-vote-complete",
+  "version": "1.0.0",
+  "description": "AGRI VISION 2125 投票システム完全版 - セキュアな1人1票制投票システム",
+  "type": "module",
+  "main": "index.html",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "deploy:functions": "firebase deploy --only functions",
+    "deploy:hosting": "npm run build && firebase deploy --only hosting",
+    "deploy:all": "npm run build && firebase deploy",
+    "config:get": "firebase functions:config:get",
+    "config:set": "firebase functions:config:set",
+    "logs": "firebase functions:log",
+    "clean": "rm -rf dist node_modules package-lock.json",
+    "reinstall": "npm run clean && npm install"
+  },
+  "keywords": [
+    "firebase",
+    "voting",
+    "authentication",
+    "realtime",
+    "agri-vision",
+    "vite",
+    "javascript"
+  ],
+  "author": "AGRI VISION 2125 Team",
+  "license": "MIT",
+  "devDependencies": {
+    "vite": "^5.0.0"
+  },
+  "dependencies": {
+    "dotenv": "^16.3.1"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/NouJouJin/agri-vote-complete.git"
+  },
+  "bugs": {
+    "url": "https://github.com/NouJouJin/agri-vote-complete/issues"
+  },
+  "homepage": "https://agri-vote-complete.web.app"
+}

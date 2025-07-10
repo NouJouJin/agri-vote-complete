@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>投票アプリ MVP</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&family=Orbitron:wght@700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-color: #0d1b2a;
+            --secondary-color: #1b263b;
+            --accent-color: #00f5d4;
+            --text-color: #e0e1dd;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+        }
+        
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            background-color: var(--primary-color);
+            color: var(--text-color);
+            font-family: 'Noto Sans JP', sans-serif;
+            margin: 0;
+            text-align: center;
+            line-height: 1.6;
+        }
+        
+        .header {
+            padding: 20px;
+            border-bottom: 3px solid var(--accent-color);
+            position: relative;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        }
+        
+        .main-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5rem;
+            color: #fff;
+            text-shadow: 0 0 15px var(--accent-color);
+            margin: 0;
+        }
+        
+        .auth-container {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+        
+        #login-btn, #logout-btn {
+            background-color: var(--accent-color);
+            color: var(--primary-color);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        #login-btn:hover, #logout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 245, 212, 0.3);
+        }
+        
+        #user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: #fff;
+            font-weight: bold;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid var(--accent-color);
+        }
+        
+        .loading {
+            display: none;
+            margin: 40px 0;
+            font-size: 18px;
+            color: var(--accent-color);
+        }
+        
+        .error-message {
+            background-color: var(--danger-color);
+            color: white;
+            padding: 15px;
+            margin: 20px;
+            border-radius: 8px;
+            display: none;
+        }
+        
+        .success-message {
+            background-color: var(--success-color);
+            color: white;
+            padding: 15px;
+            margin: 20px;
+            border-radius: 8px;
+            display: none;
+        }
+        
+        .login-prompt {
+            margin: 40px 20px;
+            padding: 30px;
+            background-color: var(--secondary-color);
+            border-radius: 12px;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .works-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            padding: 40px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .work-card {
+            background-color: var(--secondary-color);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .work-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 35px rgba(0,0,0,0.4);
+            border-color: var(--accent-color);
+        }
+        
+        .work-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            display: block;
+        }
+        
+        .card-content {
+            padding: 25px;
+            text-align: left;
+        }
+        
+        .card-title {
+            font-size: 1.4rem;
+            font-weight: bold;
+            margin: 0 0 10px;
+            color: #fff;
+        }
+        
+        .card-creator {
+            font-size: 0.9rem;
+            color: var(--accent-color);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .vote-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+        }
+        
+        .vote-count {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: var(--accent-color);
+        }
+        
+        .vote-button {
+            background-color: #0d6efd;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .vote-button:hover:not(:disabled) {
+            background-color: #0b5ed7;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(13, 110, 253, 0.3);
+        }
+        
+        .vote-button:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .vote-button.voted {
+            background-color: var(--success-color);
+            cursor: default;
+        }
+        
+        .vote-button.voted:hover {
+            background-color: var(--success-color);
+        }
+        
+        @media (max-width: 768px) {
+            .main-title {
+                font-size: 1.8rem;
+            }
+            
+            .auth-container {
+                position: static;
+                margin-top: 20px;
+            }
+            
+            .works-container {
+                grid-template-columns: 1fr;
+                padding: 20px 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1 class="main-title">投票アプリ MVP</h1>
+        <div class="auth-container">
+            <button id="login-btn">Googleでログイン</button>
+            <div id="user-info" style="display: none;">
+                <img id="user-avatar" class="user-avatar" src="" alt="プロフィール画像">
+                <span id="user-name"></span>
+                <button id="logout-btn">ログアウト</button>
+            </div>
+        </div>
+    </header>
+    
+    <main>
+        <div class="loading" id="loading">読み込み中...</div>
+        <div class="error-message" id="error-message"></div>
+        <div class="success-message" id="success-message"></div>
+        
+        <div class="login-prompt" id="login-prompt">
+            <h2>🗳️ 投票に参加しよう！</h2>
+            <p>Googleアカウントでログインして、お気に入りの作品に投票してください。</p>
+            <p><strong>※ 1人1票まで投票できます</strong></p>
+        </div>
+        
+        <div class="works-container" id="works-container" style="display: none;"></div>
+    </main>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+
+    <script>
+        // ★★★ ここにあなたのFirebase設定を貼り付けてください ★★★
+        const firebaseConfig = {
+  apiKey: "AIzaSyD1Y40EEyQ0wBeORH_i8JFugiUsSGjVldY",
+  authDomain: "agri-vote-complete.firebaseapp.com",
+  projectId: "agri-vote-complete",
+  storageBucket: "agri-vote-complete.firebasestorage.app",
+  messagingSenderId: "691520512463",
+  appId: "1:691520512463:web:dd4b63c35375cec89d72ba"
+};
+
+        // ★★★ ここまで ★★★
+
+        // Firebase初期化
+        const app = firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // 作品データ（管理者がここで設定）
+        const worksData = [
+            { 
+                id: "work1",
+                creator: "クリエイターA", 
+                title: "未来の畑", 
+                imageUrl: "https://picsum.photos/400/200?random=1"
+            },
+            { 
+                id: "work2",
+                creator: "クリエイターB", 
+                title: "宇宙トマト", 
+                imageUrl: "https://picsum.photos/400/200?random=2"
+            },
+            { 
+                id: "work3",
+                creator: "クリエイターC", 
+                title: "AI農園", 
+                imageUrl: "https://picsum.photos/400/200?random=3"
+            },
+        ];
+
+        // DOM要素
+        const elements = {
+            loginBtn: document.getElementById('login-btn'),
+            logoutBtn: document.getElementById('logout-btn'),
+            userInfo: document.getElementById('user-info'),
+            userName: document.getElementById('user-name'),
+            userAvatar: document.getElementById('user-avatar'),
+            loginPrompt: document.getElementById('login-prompt'),
+            worksContainer: document.getElementById('works-container'),
+            loading: document.getElementById('loading'),
+            errorMessage: document.getElementById('error-message'),
+            successMessage: document.getElementById('success-message')
+        };
+
+        let currentUser = null;
+        let userVoteData = null;
+
+        // メッセージ表示関数
+        function showMessage(type, message) {
+            const element = elements[type + 'Message'];
+            element.textContent = message;
+            element.style.display = 'block';
+            setTimeout(() => {
+                element.style.display = 'none';
+            }, 5000);
+        }
+
+        function showLoading(show) {
+            elements.loading.style.display = show ? 'block' : 'none';
+        }
+
+        // 入力値のサニタイズ
+        function sanitizeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        // 認証状態変更の監視
+        auth.onAuthStateChanged(async (user) => {
+            showLoading(true);
+            
+            try {
+                currentUser = user;
+                
+                if (user) {
+                    // ログイン済み
+                    elements.userInfo.style.display = 'flex';
+                    elements.userName.textContent = sanitizeHtml(user.displayName || 'ユーザー');
+                    elements.userAvatar.src = user.photoURL || 'https://via.placeholder.com/40';
+                    elements.loginBtn.style.display = 'none';
+                    elements.loginPrompt.style.display = 'none';
+                    elements.worksContainer.style.display = 'grid';
+                    
+                    // ユーザーの投票データを取得
+                    await loadUserVoteData();
+                    await renderWorks();
+                } else {
+                    // 未ログイン
+                    elements.userInfo.style.display = 'none';
+                    elements.loginBtn.style.display = 'block';
+                    elements.loginPrompt.style.display = 'block';
+                    elements.worksContainer.style.display = 'none';
+                    userVoteData = null;
+                }
+            } catch (error) {
+                console.error('認証状態の処理でエラー:', error);
+                showMessage('error', '認証処理でエラーが発生しました');
+            } finally {
+                showLoading(false);
+            }
+        });
+
+        // ユーザーの投票データを取得
+        async function loadUserVoteData() {
+            if (!currentUser) return;
+            
+            try {
+                const voteDoc = await db.collection('votes').doc(currentUser.uid).get();
+                userVoteData = voteDoc.exists ? voteDoc.data() : null;
+            } catch (error) {
+                console.error('投票データの取得に失敗:', error);
+            }
+        }
+
+        // ログイン処理
+        elements.loginBtn.addEventListener('click', async () => {
+            try {
+                showLoading(true);
+                const provider = new firebase.auth.GoogleAuthProvider();
+                provider.addScope('profile');
+                provider.addScope('email');
+                await auth.signInWithPopup(provider);
+            } catch (error) {
+                console.error('ログインエラー:', error);
+                showMessage('error', 'ログインに失敗しました');
+                showLoading(false);
+            }
+        });
+
+        // ログアウト処理
+        elements.logoutBtn.addEventListener('click', async () => {
+            try {
+                await auth.signOut();
+                showMessage('success', 'ログアウトしました');
+            } catch (error) {
+                console.error('ログアウトエラー:', error);
+                showMessage('error', 'ログアウトに失敗しました');
+            }
+        });
+
+        // 作品一覧の描画
+        async function renderWorks() {
+            elements.worksContainer.innerHTML = '';
+            
+            try {
+                for (const work of worksData) {
+                    const voteCount = await getVoteCount(work.id);
+                    const card = createWorkCard(work, voteCount);
+                    elements.worksContainer.appendChild(card);
+                }
+            } catch (error) {
+                console.error('作品一覧の描画でエラー:', error);
+                showMessage('error', '作品データの読み込みに失敗しました');
+            }
+        }
+
+        // 投票数を取得
+        async function getVoteCount(workId) {
+            try {
+                const voteDocs = await db.collection('votes')
+                    .where('votedFor', '==', workId)
+                    .get();
+                return voteDocs.size;
+            } catch (error) {
+                console.error('投票数の取得に失敗:', workId, error);
+                return 0;
+            }
+        }
+
+        // 作品カードを作成
+        function createWorkCard(work, voteCount) {
+            const card = document.createElement('div');
+            card.className = 'work-card';
+            
+            const isVoted = userVoteData && userVoteData.votedFor === work.id;
+            const hasVoted = userVoteData !== null;
+            
+            card.innerHTML = `
+                <img src="${sanitizeHtml(work.imageUrl)}" alt="${sanitizeHtml(work.title)}" loading="lazy">
+                <div class="card-content">
+                    <h3 class="card-title">${sanitizeHtml(work.title)}</h3>
+                    <p class="card-creator">👤 ${sanitizeHtml(work.creator)}</p>
+                    <div class="vote-section">
+                        <span class="vote-count">${voteCount} 票</span>
+                        <button class="vote-button ${isVoted ? 'voted' : ''}" 
+                                data-work-id="${work.id}" 
+                                ${hasVoted ? 'disabled' : ''}>
+                            ${isVoted ? '投票済み ✓' : hasVoted ? '投票済み' : '投票する'}
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            // 投票ボタンのイベントリスナー
+            const voteButton = card.querySelector('.vote-button');
+            if (!hasVoted) {
+                voteButton.addEventListener('click', () => handleVote(work.id, voteButton));
+            }
+            
+            return card;
+        }
+
+        // 投票処理
+        async function handleVote(workId, button) {
+            if (!currentUser) {
+                showMessage('error', 'ログインが必要です');
+                return;
+            }
+
+            if (userVoteData) {
+                showMessage('error', 'すでに投票済みです');
+                return;
+            }
+
+            // ボタンを無効化
+            button.disabled = true;
+            button.textContent = '投票中...';
+
+            try {
+                // セキュアな投票データを作成
+                const voteData = {
+                    votedFor: workId,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                };
+
+                // Firestoreに投票データを保存
+                await db.collection('votes').doc(currentUser.uid).set(voteData);
+
+                showMessage('success', '投票ありがとうございます！');
+                
+                // ローカルデータを更新
+                userVoteData = { ...voteData, timestamp: new Date() };
+                
+                // 画面を再描画
+                await renderWorks();
+
+            } catch (error) {
+                console.error('投票エラー:', error);
+                showMessage('error', '投票に失敗しました。もう一度お試しください。');
+                
+                // ボタンを元に戻す
+                button.disabled = false;
+                button.textContent = '投票する';
+            }
+        }
+
+        // ページ読み込み時の初期化
+        window.addEventListener('load', () => {
+            console.log('投票アプリが開始されました');
+        });
+
+        // セキュリティ対策：開発者ツールでの操作検知
+        let devtools = { open: false, orientation: null };
+        const threshold = 160;
+
+        setInterval(() => {
+            if (window.outerHeight - window.innerHeight > threshold || 
+                window.outerWidth - window.innerWidth > threshold) {
+                if (!devtools.open) {
+                    devtools.open = true;
+                    console.log('⚠️ セキュリティ警告: 開発者ツールが検出されました');
+                }
+            } else {
+                devtools.open = false;
+            }
+        }, 500);
+    </script>
+</body>
+</html>
